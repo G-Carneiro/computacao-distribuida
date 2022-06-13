@@ -1,5 +1,6 @@
 ### idea template
 .idea/
+cmake-build-*
 
 ### C template
 # Prerequisites
