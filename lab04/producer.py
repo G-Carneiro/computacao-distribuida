@@ -9,8 +9,8 @@ queue = "producer_consumer_queue"
 channel.queue_declare(queue=queue)
 
 while True:
-    # message = input("Write a message (quit to exit): ")
-    message = "a" * randint(1, 11)
+    message = input("Write a message (quit to exit): ")
+    # message = "a" * randint(1, 11)
     if (message.lower() == "quit"):
         break
 
