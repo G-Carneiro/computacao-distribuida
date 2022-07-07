@@ -14,6 +14,6 @@ Você pode revisar a aula sobre Web e o uso do servidor Web Apache como referên
 ## Dependências
 
 ```shell
-pip install SOAPpy
+pip install Flask
 ```
 
