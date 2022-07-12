@@ -17,3 +17,62 @@ Você pode revisar a aula sobre Web e o uso do servidor Web Apache como referên
 pip install Flask
 ```
 
+## Uso
+
+Para rodar o servidor use
+
+```shell
+python3 server.py
+```
+
+Para acessar a calculadora basta rodar o cliente com
+
+```shell
+python3 client.py
+```
+
+e digitar o cálculo a ser resolvido.
+
+O cálculo deve ser fornecido de uma só vez e com espaço entre números e operador (num1 operador num2). Os números podem ser inteiros ou reais.
+
+**Exemplos Válidos**
+
+- 4 / 2
+- 1.2 * 3
+
+**Exemplos Inválidos**
+
+- 4/ 2
+- 4 /2
+
+### Operações disponíveis
+
+São suportadas todas as funções que usem dois operandos do python, as quais são acessadas via um dicionário com a _string_ do operando dado, como segue:
+
+```python
+op_to_func: Dict[str, Callable] = {
+    '+': add,
+    '-': sub,
+    '*': mul,
+    '**': pow,
+    '/': truediv,
+    '//': floordiv,
+    '%': mod,
+    '^': xor,
+    '>>': rshift,
+    '<<': lshift,
+    'and': and_,
+    '|': or_,
+}
+```
+
+### Acesso via URL
+
+Também é possível acessar a calculador via url após rodar o servidor.
+
+**Exemplo**
+
+http://localhost:5000/calculator?first_operand=4&op=/&second_operand=2
+
+Aqui está sendo realizado o cálculo de 4 / 2. 
+Caso queira outros valores ou outra operação, basta trocar a _string_ logo após o `=` de acordo com o necessário.

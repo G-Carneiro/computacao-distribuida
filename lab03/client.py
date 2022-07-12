@@ -4,7 +4,7 @@ from requests import get
 
 while True:
     try:
-        entry: str = input("Digite a conta que deseja resolver (CTRL + C to exit): ")
+        entry: str = input("Digite a conta que deseja resolver (CTRL + C para sair): ")
         first_operand, op, second_operand = entry.split(" ")
     except KeyboardInterrupt:
         print()
