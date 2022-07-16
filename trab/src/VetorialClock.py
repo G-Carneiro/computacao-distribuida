@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import List
+from operator import gt, ne, lt
+from typing import List, Callable
 
 
 class VetorialClock:
@@ -26,27 +27,21 @@ class VetorialClock:
 
         return None
 
-    def __eq__(self, other: VetorialClock) -> bool:
+    def _compare(self, other: VetorialClock, operator: Callable, cond_return: bool = False) -> bool:
         for i in range(self._process_number):
-            if (self._vector[i] != other[i]):
-                return False
+            if operator(self._vector[i], other[i]):
+                return cond_return
 
-        return True
+        return not cond_return
+
+    def __eq__(self, other: VetorialClock) -> bool:
+        return self._compare(other=other, operator=ne)
 
     def __le__(self, other: VetorialClock) -> bool:
-        for i in range(self._process_number):
-            if (self._vector[i] > other[i]):
-                return False
-
-        return True
+        return self._compare(other=other, operator=gt)
 
     def __lt__(self, other: VetorialClock) -> bool:
-        if (self <= other):
-            for i in range(self._process_number):
-                if (self._vector[i] < other[i]):
-                    return True
-
-        return False
+        return (self <= other) and self._compare(other=other, operator=lt, cond_return=True)
 
     def __getitem__(self, item: int) -> int:
         return self._vector[item]
