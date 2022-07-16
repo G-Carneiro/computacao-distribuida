@@ -1,0 +1,9 @@
+//config_nodo_0
+
+processes = 3
+
+id = 0
+
+node = 0 localhost:6000
+node = 1 localhost:5000
+node = 2 localhost:4000 
