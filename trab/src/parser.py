@@ -1,5 +1,5 @@
-from cv2 import split
-from Node.node import Node
+from .node import Node
+
 
 class Parser:
     
@@ -9,7 +9,7 @@ class Parser:
     def get_node(self):
 
         file = open(self.file_path, 'r')
-        lines =  file.readlines()
+        lines = file.readlines()
         nodes_addresses = list()
 
         for line in lines:

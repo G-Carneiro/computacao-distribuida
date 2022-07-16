@@ -6,5 +6,8 @@ class Node:
         self.node_addresses = node_addresses
 
     def __str__(self):
-         return f"Node\n Processes: {self.processes }\n Id: {self.node_id} \n Nodes Addresses: {self.node_addresses}"
+        return f"Node \n" \
+               f"Processes: {self.processes } \n" \
+               f"Id: {self.node_id} \n" \
+               f"Nodes Addresses: {self.node_addresses}"
 
