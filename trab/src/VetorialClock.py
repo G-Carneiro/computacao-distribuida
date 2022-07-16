@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import List
 
 
@@ -21,20 +22,20 @@ class VetorialClock:
         for i in range(self._process_number):
             self._vector[i] += 1
             if (i != process_id):
-                self._vector[i] = max(self._vector[i], other.vector()[i])
+                self._vector[i] = max(self._vector[i], other[i])
 
         return None
 
     def __eq__(self, other: VetorialClock) -> bool:
         for i in range(self._process_number):
-            if (self._vector[i] != other.vector()[i]):
+            if (self._vector[i] != other[i]):
                 return False
 
         return True
 
     def __le__(self, other: VetorialClock) -> bool:
         for i in range(self._process_number):
-            if (self._vector[i] > other.vector()[i]):
+            if (self._vector[i] > other[i]):
                 return False
 
         return True
@@ -42,15 +43,16 @@ class VetorialClock:
     def __lt__(self, other: VetorialClock) -> bool:
         if (self <= other):
             for i in range(self._process_number):
-                if (self._vector[i] < other.vector()[i]):
+                if (self._vector[i] < other[i]):
                     return True
 
         return False
+
+    def __getitem__(self, item: int) -> int:
+        return self._vector[item]
 
     def concurrent(self, other: VetorialClock) -> bool:
         return (not (self <= other) and not (other <= self))
 
     def causal(self, other: VetorialClock) -> bool:
         return (self < other)
-
-
