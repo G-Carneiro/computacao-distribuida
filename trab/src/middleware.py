@@ -1,20 +1,20 @@
-import socket
-from typing import List
+from socket import socket, AF_INET, SOCK_STREAM
+from typing import List, Dict
 
-from .utils import Address
+from .utils import Address, Buffer, Message
 
 
 class Middleware:
 
-    def __init__(self, n_process, address: Address, processes_address):
+    def __init__(self, address: Address, processes_address: List[Address]):
         # TODO: trocar para dicionários irá facilitar Dict[address, msg]
-        self.buffer = [list() for _ in range(n_process)]
-        self.input_buffer = [0 for _ in range(n_process)]
-        self.output_buffer = [0 for _ in range(n_process)]
+        self.buffer: Buffer = {address: [] for address in processes_address}
+        self.input_buffer: Dict[Address, int] = {address: 0 for address in processes_address}
+        self.output_buffer: Dict[Address, int] = {address: 0 for address in processes_address}
         self.received_messages: List[str] = []
         self.address: Address = address
-        self.processes_address = processes_address
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.processes_address: List[Address] = processes_address
+        self.client_socket = socket(AF_INET, SOCK_STREAM)
 
     def __str__(self):
         return (self.buffer, self.input_buffer, self.output_buffer)
@@ -24,33 +24,25 @@ class Middleware:
         return None
 
     @staticmethod
-    def parse_id_msg(data):
-        splitted = data.split("#")
-        msg_id = splitted[1]
-        return msg_id
-
-    @staticmethod
-    def parse_msg(data):
+    def parse_msg(data) -> Message:
         """
-        Example: ProcessID # MsgID # MsgTxt
+        Example: MsgID # MsgTxt
         """
 
         splitted = data.split("#")
-        process_id = splitted[0]
-        msg_id = splitted[1]
-        msg = splitted[2]
+        msg_id = splitted[0]
+        msg = splitted[1]
 
-        return (process_id, msg_id, msg)
+        return Message(data=msg, id_=int(msg_id))
 
-    def check_buffer(self, id_proc):
-        for msg in self.buffer[id_proc]:
-            id_msg, msg_parsed = self.parse_id_msg(msg)
-            id_msg_input = self.input_buffer[id_proc]
-
-            if id_msg == id_msg_input:
-                self.deliver_message(message=msg_parsed)
-                self.input_buffer[id_proc] += 1
-                self.check_buffer(id_proc)
+    def check_buffer(self, process_address: Address):
+        id_msg_input = self.input_buffer[process_address]
+        for msg in self.buffer[process_address]:
+            if msg.id == id_msg_input:
+                self.deliver_message(message=msg.data)
+                self.buffer[process_address].remove(msg)    # remover do buffer tornará as buscas mais rápidas
+                self.input_buffer[process_address] += 1
+                self.check_buffer(process_address)
                 break
             
     def on_send(self, msg, id_proc_dest):
@@ -59,20 +51,21 @@ class Middleware:
         self.send_to_socket(id_proc_dest, id_msg, msg)
         self.input_buffer[id_proc_dest] += 1
 
-    def on_recv(self, msg):
-        id_proc, id_msg, msg_parsed = self.parse_msg(msg)
-        id_msg_input = self.input_buffer[id_proc]
+    def on_recv(self, msg: bytes, process_address: Address):
+        message: Message = self.parse_msg(msg)
+        id_msg_input = self.input_buffer[process_address]
 
-        if id_msg == id_msg_input:
-            self.deliver_message(message=msg_parsed)
-            self.input_buffer[id_proc] += 1
-            self.check_buffer(id_proc)
+        if message.id == id_msg_input:
+            self.deliver_message(message=message.data)
+            self.input_buffer[process_address] += 1
+            self.check_buffer(process_address)
 
         else:
-            self.buffer[id_proc].append(msg)
+            self.buffer[process_address].append(message)
 
     def start_socket(self):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        # pq inicializar o socket aqui? self.client_socket não era pra isso?
+        with socket(AF_INET, SOCK_STREAM) as s:
             s.bind(self.address)
             s.listen()
             conn, addr = s.accept()
@@ -80,7 +73,7 @@ class Middleware:
                 print(f"Connected by {addr}")
                 while True:
                     data = conn.recv(1024)
-                    self.on_recv(data)
+                    self.on_recv(msg=data, process_address=addr)
                     if not data:
                         break
                     conn.sendall(data)
