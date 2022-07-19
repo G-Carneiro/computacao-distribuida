@@ -1,15 +1,15 @@
 from socket import socket, AF_INET, SOCK_STREAM
-from typing import List, Tuple
+from typing import List
 
-from .middleware import Middleware
+from .node import Node
 from .utils import Address
 
 
 class Sequencer:
     # TODO: será necessário um socket para realizar o envio/recebimento de mensagens
-    def __init__(self, processes: List[Middleware], address: Address):
+    def __init__(self, processes: List[Node], address: Address):
         self._seq_num: int = 1
-        self._processes: List[Middleware] = processes
+        self._processes: List[Node] = processes
         self._socket: socket = socket(AF_INET, SOCK_STREAM)
         self._address: Address = address
 

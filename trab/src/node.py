@@ -4,7 +4,7 @@ from typing import List, Dict
 from .utils import Address, Buffer, Message
 
 
-class Middleware:
+class Node:
 
     def __init__(self, address: Address, processes_address: List[Address]):
         # TODO: trocar para dicionários irá facilitar Dict[address, msg]
