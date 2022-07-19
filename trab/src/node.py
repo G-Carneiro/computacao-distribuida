@@ -1,10 +1,10 @@
-from trab.src.middleware import Middleware
+from .middleware import Middleware
 
 
 class Node:
 
-    def __init__(self, middleware):
-        self.middleware = middleware
+    def __init__(self, middleware: Middleware):
+        self.middleware: Middleware = middleware
         self.list_of_received_msgs = list()
 
     def deliver_message(self, msg):

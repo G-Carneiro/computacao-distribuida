@@ -1,31 +1,32 @@
-from concurrent.futures import process
 import socket
+
 
 class Middleware:
 
     def __init__(self, n_process, host, port, processes_address, dad_process):
-        self.buffer = [list() for i in range(n_process)]
-        self.input_buffer = [0 for i in range(n_process)]
-        self.output_buffer = [0 for i in range(n_process)]
+        self.buffer = [list() for _ in range(n_process)]
+        self.input_buffer = [0 for _ in range(n_process)]
+        self.output_buffer = [0 for _ in range(n_process)]
         self.host = host
         self.port = port
         self.processes_address = processes_address
         self.dad_process = dad_process
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
-
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def __str__(self):
         return (self.buffer, self.input_buffer, self.output_buffer)
 
-    def parse_id_msg(self, data):
+    @staticmethod
+    def parse_id_msg(data):
         splitted = data.split("#")
         msg_id = splitted[1]
         return msg_id
 
-    def parse_msg(self, data):
-        '''
+    @staticmethod
+    def parse_msg(data):
+        """
         Example: ProcessID # MsgID # MsgTxt
-        '''
+        """
 
         splitted = data.split("#")
         process_id = splitted[0]
@@ -47,7 +48,7 @@ class Middleware:
             
     def on_send(self, msg, id_proc_dest):
         id_msg = self.input_buffer[id_proc_dest]
-        send_to_socket(id_proc_dest, id_msg, msg)
+        self.send_to_socket(id_proc_dest, id_msg, msg)
         self.input_buffer[id_proc_dest] += 1
 
     def on_recv(self, msg):
@@ -76,8 +77,5 @@ class Middleware:
                         break
                     conn.sendall(data)
 
-    def send_to_socket(id_proc_dest, id_msg, msg):
-        clientSocket.connect(("127.0.0.1",9090));
-        
- 
-
+    def send_to_socket(self, id_proc_dest, id_msg, msg):
+        self.client_socket.connect(("127.0.0.1", 9090))
