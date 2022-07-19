@@ -1,4 +1,7 @@
+from typing import List
+
 from .node import Node
+from .utils import Address
 
 
 class Parser:
@@ -6,25 +9,21 @@ class Parser:
     def __init__(self, file_path):
         self.file_path = file_path
     
-    def get_node(self):
+    def get_nodes(self) -> List[Node]:
+        with open(self.file_path, 'r') as file:
+            lines = file.readlines()
+            nodes_addresses: List[Address] = list()
 
-        file = open(self.file_path, 'r')
-        lines = file.readlines()
-        nodes_addresses = list()
+            for line in lines:
+                splitted = line.split(":")
+                host: str = splitted[0]
+                port: int = int(splitted[1])
+                address: Address = (host, port)
+                nodes_addresses.append(address)
 
-        for line in lines:
-        
-            if "processes" in line:
-                splitted = line.split()
-                processes = splitted[2]
+        nodes: List[Node] = []
+        for address in nodes_addresses:
+            new_node: Node = Node(address=address, processes_address=nodes_addresses)
+            nodes.append(new_node)
 
-            if "id" in line:
-                splitted = line.split()
-                node_id = splitted[2]
-
-            if "node" in line:
-                splitted = line.split()
-                nodes_addresses.append((splitted[2], splitted[3]))
-
-        # FIXME:
-        return Node(processes, node_id, nodes_addresses)
+        return nodes

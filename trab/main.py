@@ -1,13 +1,14 @@
-from src.parser import Parser
+from typing import List
+
 from src.node import Node
+from src.parser import Parser
+
 
 def main():
     parser = Parser("Config/config_node_test.txt")
-    node = parser.get_node()
-    print(node)
+    nodes: List[Node] = parser.get_nodes()
+    print(nodes)
     
-    mid = Node(3)
-    print(mid)
 
 if __name__ == "__main__":
     main()
