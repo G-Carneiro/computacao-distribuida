@@ -7,11 +7,10 @@ from .utils import Address, Buffer, Message
 class Node:
 
     def __init__(self, address: Address, processes_address: List[Address]):
-        # TODO: trocar para dicionários irá facilitar Dict[address, msg]
         self.buffer: Buffer = {address: [] for address in processes_address}
         self.input_buffer: Dict[Address, int] = {address: 0 for address in processes_address}
         self.output_buffer: Dict[Address, int] = {address: 0 for address in processes_address}
-        self.received_messages: List[str] = []
+        self.received_messages: List[Message] = []
         self.address: Address = address
         self.processes_address: List[Address] = processes_address
         self.client_socket = socket(AF_INET, SOCK_STREAM)
@@ -19,7 +18,7 @@ class Node:
     def __str__(self):
         return (self.buffer, self.input_buffer, self.output_buffer)
 
-    def deliver_message(self, message: str) -> None:
+    def deliver_message(self, message: Message) -> None:
         self.received_messages.append(message)
         return None
 
@@ -39,29 +38,32 @@ class Node:
         id_msg_input = self.input_buffer[process_address]
         for msg in self.buffer[process_address]:
             if msg.id == id_msg_input:
-                self.deliver_message(message=msg.data)
+                self.deliver_message(message=msg)
                 self.buffer[process_address].remove(msg)    # remover do buffer tornará as buscas mais rápidas
                 self.input_buffer[process_address] += 1
                 self.check_buffer(process_address)
                 break
             
-    def on_send(self, msg, id_proc_dest):
-        # não deveria ser output_buffer?
-        id_msg = self.input_buffer[id_proc_dest]
-        self.send_to_socket(id_proc_dest, id_msg, msg)
-        self.input_buffer[id_proc_dest] += 1
+    def on_send(self, message: str, destiny_address: Address):
+        id_msg = self.output_buffer[destiny_address]
+        self.send_to_socket(destiny_address, id_msg, message)
+        self.output_buffer[destiny_address] += 1
 
-    def on_recv(self, msg: bytes, process_address: Address):
+    def on_recv(self, msg: bytes, process_address: Address) -> None:
         message: Message = self.parse_msg(msg)
+        if (message in self.buffer[process_address] + self.received_messages):
+            return None
         id_msg_input = self.input_buffer[process_address]
 
         if message.id == id_msg_input:
-            self.deliver_message(message=message.data)
+            self.deliver_message(message=message)
             self.input_buffer[process_address] += 1
             self.check_buffer(process_address)
 
         else:
             self.buffer[process_address].append(message)
+
+        return None
 
     def start_socket(self):
         # pq inicializar o socket aqui? self.client_socket não era pra isso?
