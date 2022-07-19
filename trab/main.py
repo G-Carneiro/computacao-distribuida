@@ -1,12 +1,11 @@
 from typing import List
 
 from src.node import Node
-from src.parser import Parser
+from src.utils import parser
 
 
 def main():
-    parser = Parser("Config/config_node_test.txt")
-    nodes: List[Node] = parser.get_nodes()
+    nodes: List[Node] = parser("Config/config_node_test.txt")
     print(nodes)
     
 
