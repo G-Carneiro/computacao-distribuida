@@ -1,20 +1,27 @@
 import socket
+from typing import List
+
+from .utils import Address
 
 
 class Middleware:
 
-    def __init__(self, n_process, host, port, processes_address, dad_process):
+    def __init__(self, n_process, address: Address, processes_address):
+        # TODO: trocar para dicionários irá facilitar Dict[address, msg]
         self.buffer = [list() for _ in range(n_process)]
         self.input_buffer = [0 for _ in range(n_process)]
         self.output_buffer = [0 for _ in range(n_process)]
-        self.host = host
-        self.port = port
+        self.received_messages: List[str] = []
+        self.address: Address = address
         self.processes_address = processes_address
-        self.dad_process = dad_process
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def __str__(self):
         return (self.buffer, self.input_buffer, self.output_buffer)
+
+    def deliver_message(self, message: str) -> None:
+        self.received_messages.append(message)
+        return None
 
     @staticmethod
     def parse_id_msg(data):
@@ -41,12 +48,13 @@ class Middleware:
             id_msg_input = self.input_buffer[id_proc]
 
             if id_msg == id_msg_input:
-                self.dad_process.deliver_msg(msg_parsed)
+                self.deliver_message(message=msg_parsed)
                 self.input_buffer[id_proc] += 1
                 self.check_buffer(id_proc)
                 break
             
     def on_send(self, msg, id_proc_dest):
+        # não deveria ser output_buffer?
         id_msg = self.input_buffer[id_proc_dest]
         self.send_to_socket(id_proc_dest, id_msg, msg)
         self.input_buffer[id_proc_dest] += 1
@@ -56,16 +64,16 @@ class Middleware:
         id_msg_input = self.input_buffer[id_proc]
 
         if id_msg == id_msg_input:
-            self.dad_process.deliver_msg(msg_parsed)
+            self.deliver_message(message=msg_parsed)
             self.input_buffer[id_proc] += 1
-            self.check_buffer(id_proc) 
+            self.check_buffer(id_proc)
 
         else:
             self.buffer[id_proc].append(msg)
 
     def start_socket(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind((self.host, self.port))
+            s.bind(self.address)
             s.listen()
             conn, addr = s.accept()
             with conn:
@@ -78,4 +86,5 @@ class Middleware:
                     conn.sendall(data)
 
     def send_to_socket(self, id_proc_dest, id_msg, msg):
+        # TODO: complete
         self.client_socket.connect(("127.0.0.1", 9090))

@@ -1,13 +1,17 @@
-from typing import List
+from socket import socket, AF_INET, SOCK_STREAM
+from typing import List, Tuple
 
-from .node import Node
+from .middleware import Middleware
+from .utils import Address
 
 
 class Sequencer:
     # TODO: será necessário um socket para realizar o envio/recebimento de mensagens
-    def __init__(self, processes: List[Node]):
+    def __init__(self, processes: List[Middleware], address: Address):
         self._seq_num: int = 1
-        self._processes: List[Node] = processes
+        self._processes: List[Middleware] = processes
+        self._socket: socket = socket(AF_INET, SOCK_STREAM)
+        self._address: Address = address
 
     def receive(self, message: bytes) -> None:
         new_message: str = message.decode() + f"#{self._seq_num}"
@@ -17,6 +21,7 @@ class Sequencer:
 
     def send(self, message: bytes) -> None:
         for process in self._processes:
-            process.deliver_message(message)
+            # FIXME: não vai funcionar, socket necerrário
+            process.deliver_message(message.decode())
 
         return None

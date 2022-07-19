@@ -1,4 +1,4 @@
-from .node import Node
+from .middleware import Middleware
 
 
 class Parser:
@@ -26,4 +26,5 @@ class Parser:
                 splitted = line.split()
                 nodes_addresses.append((splitted[2], splitted[3]))
 
-        return Node(processes, node_id, nodes_addresses)
+        # FIXME:
+        return Middleware(processes, node_id, nodes_addresses)
