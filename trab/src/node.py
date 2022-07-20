@@ -18,6 +18,9 @@ class Node:
     def __str__(self):
         return (self.buffer, self.input_buffer, self.output_buffer)
 
+    def __repr__(self):
+        return f"{self.address}"
+
     def deliver_message(self, message: Message) -> None:
         self.received_messages.append(message)
         return None
