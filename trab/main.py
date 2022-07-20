@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Dict, Tuple
+from multiprocessing import Process
 
 from src.node import Node
 from src.utils import Address
@@ -24,10 +25,24 @@ def parser(file_path: str) -> List[Node]:
     return nodes
 
 
+def receiver(node: Node) -> None:
+    pass
+
+
+def sender(node: Node) -> None:
+    pass
+
+
 def main():
     nodes: List[Node] = parser("Config/config_node_test.txt")
     print(nodes)
-    
+    processes: Dict[Node, Tuple[Process, Process]] = {}
+
+    for node in nodes:
+        new_sender: Process = Process(target=sender, args=(node))
+        new_receiver: Process = Process(target=receiver, args=(node))
+        processes[node] = (new_sender, new_receiver)
+
 
 if __name__ == "__main__":
     main()
