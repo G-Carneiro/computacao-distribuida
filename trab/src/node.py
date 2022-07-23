@@ -6,34 +6,42 @@ from .utils import Address, Buffer, Message
 
 class Node:
 
-    def __init__(self, address: Address, processes_address: List[Address]):
-        self.buffer: Buffer = {address: [] for address in processes_address}
-        self.input_buffer: Dict[Address, int] = {address: 0 for address in processes_address}
-        self.output_buffer: Dict[Address, int] = {address: 0 for address in processes_address}
+    def __init__(self, receiver_address: Address,
+                 sender_address: Address,
+                 receivers_addresses: List[Address],
+                 senders_addresses: List[Address]):
+        self.buffer: Buffer = {address: [] for address in senders_addresses}
+        self.input_buffer: Dict[Address, int] = {address: 0 for address in senders_addresses}
+        self.output_buffer: Dict[Address, int] = {address: 0 for address in receivers_addresses}
         self.received_messages: List[Message] = []
-        self.address: Address = address
-        self.processes_address: List[Address] = processes_address
-        self.socket = socket(AF_INET, SOCK_STREAM)
+        self.receiver_address: Address = receiver_address
+        self.sender_address: Address = sender_address
+        self.senders_addresses: List[Address] = senders_addresses
+        self.receiver_socket = socket(AF_INET, SOCK_STREAM)
+        self.receiver_socket.bind(self.receiver_address)
+        self.sender_socket = socket(AF_INET, SOCK_STREAM)
+        self.sender_socket.bind(self.sender_address)
 
     def __str__(self):
         return (self.buffer, self.input_buffer, self.output_buffer)
 
     def __repr__(self):
-        return f"{self.address}"
+        return f"{self.receiver_address}"
 
     def deliver_message(self, message: Message) -> None:
         self.received_messages.append(message)
         return None
 
     @staticmethod
-    def parse_msg(data) -> Message:
+    def parse_msg(data: bytes) -> Message:
         """
-        Example: MsgID # MsgTxt
+        Example: MsgTxt # MsgID
         """
 
+        data = data.decode()
         splitted = data.split("#")
-        msg_id = splitted[0]
-        msg = splitted[1]
+        msg = splitted[0]
+        msg_id = splitted[1]
 
         return Message(data=msg, id_=int(msg_id))
 
@@ -47,14 +55,21 @@ class Node:
                 self.check_buffer(process_address)
                 break
             
-    def on_send(self, message: str, destiny_address: Address):
+    def on_send(self, message: str, destiny_address: Address) -> bytes:
         id_msg = self.output_buffer[destiny_address]
-        self.send_to_socket(destiny_address, id_msg, message)
+        message += f"#{id_msg}"
         self.output_buffer[destiny_address] += 1
+        return message.encode()
 
     def on_recv(self, msg: bytes, process_address: Address) -> None:
         message: Message = self.parse_msg(msg)
-        if (message in self.buffer[process_address] + self.received_messages):
+        try:
+            process_buffer = self.buffer[process_address]
+        except KeyError:
+            print(f"Erro: endereço {process_address} não reconhecido.")
+            return None
+
+        if (message in process_buffer + self.received_messages):
             return None
         id_msg_input = self.input_buffer[process_address]
 
@@ -66,22 +81,23 @@ class Node:
         else:
             self.buffer[process_address].append(message)
 
+        print(f"{self.receiver_address} received {message.data} from {process_address}.")
+
         return None
 
     def start_socket(self):
-        self.socket.bind(self.address)
-        self.socket.listen(len(self.processes_address))
+        self.receiver_socket.listen(len(self.senders_addresses))
         while True:
-            conn, addr = self.socket.accept()
+            conn, addr = self.receiver_socket.accept()
             with conn:
-                print(f"Connected by {addr}")
                 data = conn.recv(1024)
                 self.on_recv(msg=data, process_address=addr)
                 conn.sendall(data)
 
     def send_to_socket(self, address: Address, data: str) -> None:
-        print(address)
-        self.socket.connect(address)
-        self.socket.sendall(f"b{data}")
-        self.socket.close()
+        message: bytes = self.on_send(message=data, destiny_address=address)
+        self.sender_socket.connect(address)
+        self.sender_socket.sendall(message)
+        self.sender_socket.close()
+        print(f"{self.sender_address} send {data} to {address}")
         return None
