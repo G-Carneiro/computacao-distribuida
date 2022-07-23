@@ -26,11 +26,14 @@ def parser(file_path: str) -> List[Node]:
 
 
 def receiver(node: Node) -> None:
-    pass
+    node.start_socket()
+    return None
 
 
 def sender(node: Node) -> None:
-    pass
+    if node.address == ("localhost", 4000):
+        node.send_to_socket(("localhost", 5000), "oi")
+    return None
 
 
 def main():
@@ -39,8 +42,10 @@ def main():
     processes: Dict[Node, Tuple[Process, Process]] = {}
 
     for node in nodes:
-        new_sender: Process = Process(target=sender, args=(node))
-        new_receiver: Process = Process(target=receiver, args=(node))
+        new_sender: Process = Process(target=sender, args=(node,))
+        new_receiver: Process = Process(target=receiver, args=(node,))
+        new_receiver.start()
+        new_sender.start()
         processes[node] = (new_sender, new_receiver)
 
 

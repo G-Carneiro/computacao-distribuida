@@ -13,7 +13,7 @@ class Node:
         self.received_messages: List[Message] = []
         self.address: Address = address
         self.processes_address: List[Address] = processes_address
-        self.client_socket = socket(AF_INET, SOCK_STREAM)
+        self.socket = socket(AF_INET, SOCK_STREAM)
 
     def __str__(self):
         return (self.buffer, self.input_buffer, self.output_buffer)
@@ -69,20 +69,19 @@ class Node:
         return None
 
     def start_socket(self):
-        # pq inicializar o socket aqui? self.client_socket não era pra isso?
-        with socket(AF_INET, SOCK_STREAM) as s:
-            s.bind(self.address)
-            s.listen()
-            conn, addr = s.accept()
+        self.socket.bind(self.address)
+        self.socket.listen(len(self.processes_address))
+        while True:
+            conn, addr = self.socket.accept()
             with conn:
                 print(f"Connected by {addr}")
-                while True:
-                    data = conn.recv(1024)
-                    self.on_recv(msg=data, process_address=addr)
-                    if not data:
-                        break
-                    conn.sendall(data)
+                data = conn.recv(1024)
+                self.on_recv(msg=data, process_address=addr)
+                conn.sendall(data)
 
-    def send_to_socket(self, id_proc_dest, id_msg, msg):
-        # TODO: complete
-        self.client_socket.connect(("127.0.0.1", 9090))
+    def send_to_socket(self, address: Address, data: str) -> None:
+        print(address)
+        self.socket.connect(address)
+        self.socket.sendall(f"b{data}")
+        self.socket.close()
+        return None
