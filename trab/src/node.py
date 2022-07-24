@@ -49,6 +49,15 @@ class Node:
     def on_recv(self, msg: bytes) -> None:
         message: Message = parse_msg(msg)
         process_address = message.origin_address
+        # Teste para ver se buffer está funcionando corretamente
+        # Trocar o id da mensagem de 1 para 2 deve fazer com que
+        # ela fique em buffer, sem ser lida automaticamente.
+        # Somente será lida quando a mensagem 2 (que receberá id = 1)
+        # chegar, então serão lidas em ordem conforme o id.
+        # if (message.id == 1):
+        #     message.id = 2
+        # elif (message.id == 2):
+        #     message.id = 1
         try:
             process_buffer = self.buffer[process_address]
         except KeyError:
