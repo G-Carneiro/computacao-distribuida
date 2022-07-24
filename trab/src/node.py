@@ -1,12 +1,13 @@
 from socket import socket, AF_INET, SOCK_STREAM
 from typing import List, Dict
 
-from .utils import Address, Buffer, Message
+from .utils import Address, Buffer, Message, parse_msg, address_to_id
 
 
 class Node:
 
-    def __init__(self, receiver_address: Address,
+    def __init__(self, id_: int,
+                 receiver_address: Address,
                  sender_address: Address,
                  receivers_addresses: List[Address],
                  senders_addresses: List[Address]):
@@ -17,10 +18,12 @@ class Node:
         self.receiver_address: Address = receiver_address
         self.sender_address: Address = sender_address
         self.senders_addresses: List[Address] = senders_addresses
+        self.receivers_addresses: List[Address] = receivers_addresses
         self.receiver_socket = socket(AF_INET, SOCK_STREAM)
         self.receiver_socket.bind(self.receiver_address)
         self.sender_socket = socket(AF_INET, SOCK_STREAM)
         self.sender_socket.bind(self.sender_address)
+        self.id = id_
 
     def __str__(self):
         return (self.buffer, self.input_buffer, self.output_buffer)
@@ -31,19 +34,6 @@ class Node:
     def deliver_message(self, message: Message) -> None:
         self.received_messages.append(message)
         return None
-
-    @staticmethod
-    def parse_msg(data: bytes) -> Message:
-        """
-        Example: MsgTxt # MsgID
-        """
-
-        data = data.decode()
-        splitted = data.split("#")
-        msg = splitted[0]
-        msg_id = splitted[1]
-
-        return Message(data=msg, id_=int(msg_id))
 
     def check_buffer(self, process_address: Address):
         id_msg_input = self.input_buffer[process_address]
@@ -57,12 +47,13 @@ class Node:
             
     def on_send(self, message: str, destiny_address: Address) -> bytes:
         id_msg = self.output_buffer[destiny_address]
-        message += f"#{id_msg}"
+        message += f"#{id_msg}#{self.id}#{self.sender_address}"
         self.output_buffer[destiny_address] += 1
         return message.encode()
 
-    def on_recv(self, msg: bytes, process_address: Address) -> None:
-        message: Message = self.parse_msg(msg)
+    def on_recv(self, msg: bytes) -> None:
+        message: Message = parse_msg(msg)
+        process_address = message.origin_address
         try:
             process_buffer = self.buffer[process_address]
         except KeyError:
@@ -81,7 +72,8 @@ class Node:
         else:
             self.buffer[process_address].append(message)
 
-        print(f"{self.receiver_address} received {message.data} from {process_address}.")
+        print(f"{self.id} received '{message.data}' "
+              f"from {message.origin_id}.")
 
         return None
 
@@ -91,7 +83,7 @@ class Node:
             conn, addr = self.receiver_socket.accept()
             with conn:
                 data = conn.recv(1024)
-                self.on_recv(msg=data, process_address=addr)
+                self.on_recv(msg=data)
                 conn.sendall(data)
 
     def send_to_socket(self, address: Address, data: str) -> None:
@@ -99,5 +91,5 @@ class Node:
         self.sender_socket.connect(address)
         self.sender_socket.sendall(message)
         self.sender_socket.close()
-        print(f"{self.sender_address} send {data} to {address}")
+        print(f"{self.id} send '{data}' to {address_to_id(address)}{address}.")
         return None
