@@ -10,8 +10,8 @@ class Node:
                  address: Address,
                  addresses: List[Address]):
         self.buffer: Buffer = {address: [] for address in addresses}
-        self.input_buffer: Dict[Address, int] = {address: 0 for address in addresses}
-        self.output_buffer: Dict[Address, int] = {address: 0 for address in addresses}
+        self.input_buffer: Dict[Address, int] = {address: 1 for address in addresses}
+        self.output_buffer: Dict[Address, int] = {address: 1 for address in addresses}
         self.received_messages: List[Message] = []
         self.address: Address = address
         self.addresses: List[Address] = addresses
@@ -58,6 +58,7 @@ class Node:
         if (message in process_buffer + self.received_messages):
             print(f"{self.id}: Já havia recebido '{message.data}', ignorando...")
             return None
+
         id_msg_input = self.input_buffer[process_address]
 
         print(f"{self.id}: mensagem '{message.data}', "
@@ -67,10 +68,8 @@ class Node:
             self.deliver_message(message=message)
             self.input_buffer[process_address] += 1
             self.check_buffer(process_address)
-
         else:
             self.buffer[process_address].append(message)
-
         return None
 
     def start_socket(self):
