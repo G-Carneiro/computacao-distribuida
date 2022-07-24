@@ -405,7 +405,8 @@ Prof. Dr. Odorico Machado Mendizabal}
     Gabriel Campos Albino\\
     Paulo Arthur Sens Coelho\\
 	Erik Kazuo Sugawara \\
-	Telefone: +55 (48) 99814-7971 \\
+	Email:\\
+	Email:\\
 	Email: erik.sugawara@grad.ufsc.br \\
 \end{center}
 % ----------------------------------------------------------
@@ -472,6 +473,12 @@ podemos ver o esquema de um nodo.
 
 \chapter{Desenvolvimento}
 \section{Biblioteca}
+\section{Mensagem}
+Internamente as mensagens são compostas por quatro atributos: dados a serem enviados, id da mensagem,
+id do processo e endereço do processo. Cada mensagem é transferido na forma de bytes,
+onde é realizado um parse dela. Em nossa biblioteca, enviamos uma string em bytes com o seguinte
+corpo: DataTxt \# MsgID \# ProcessID \# ProcessAddress.
+
 \subsection{Recebimento de mensagens}
 O método responsável por receber as mensagens verifica se a mensagem recebida
 está no buffer do processo. Se sim, ignora a mensagem. Do contrário, verifica se
@@ -496,11 +503,18 @@ comunicantes.
     \label{fig:send}
 \end{figure}
 
+\section{Algoritmo Token Ring}
+Nesse algoritmo é construído um anel lógico com os processos comunicantes.
+Em sua inicialização o processo 0 recebe um token. Ele deve circular 
+pelo anel passando de um processo k para o k + 1. Quando o processo
+recebe o token ele pode executar a região crítica (uma única vez) e, após sair,
+passa o token para o próximo processo. Se o processo não desejar entrar na 
+região crítica, deve apenas passar o token para o próximo processo.
+
 \section{Execução}
 
 \section{Resultados}
-\section{Algoritmo}
-Mostrar o algoritmo Ring.
+
 \section{Conclusão}
 \section{Referências}
 %\section{Conclusões e/ou Recomendações}
