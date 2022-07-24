@@ -12,13 +12,18 @@ def receiver(node: Node) -> None:
 
 
 def sender(node: Node) -> None:
-    if node.address == ('127.0.0.1', 5001):
+    # if node.address == ('127.0.0.1', 5000):
         # node.send_to_socket(('127.0.0.1', 5003), "oi")
-        node.send_to_socket((HOST, 5002), "hi")
-        node.send_to_socket((HOST, 5002), "hi2")
+        # node.send_to_socket((HOST, 5002), "hi")
+        # node.send_to_socket((HOST, 5002), "hi2")
     # if node.address == ('127.0.0.1', 5005):
     #     node.send_to_socket(('127.0.0.1', 5003), "oi")
     #     node.send_to_socket((HOST, 5003), "hi")
+    return None
+
+
+def token_ring(nodes: List[Node]) -> None:
+    nodes[0].send_to_socket(nodes[1].address, data="token")
     return None
 
 
@@ -29,12 +34,13 @@ def main():
         new_sender: Address = (HOST, PORT + i)
         addresses.append(new_sender)
 
-    for i in range(NUMBER_OF_PROCESS):
-        new_node: Node = Node(id_=i, address=addresses[i], addresses=addresses)
-        nodes.append(new_node)
-    processes: Dict[Node, Tuple[Process, Process]] = {}
     sequencer: Sequencer = Sequencer(id_=NUMBER_OF_PROCESS, addresses=addresses,
                                      address=addresses[-1])
+    for i in range(NUMBER_OF_PROCESS):
+        new_node: Node = Node(id_=i, address=addresses[i], addresses=addresses,
+                              sequencer_address=sequencer.address)
+        nodes.append(new_node)
+    processes: Dict[Node, Tuple[Process, Process]] = {}
     sequencer_sender = Process(name="Sequencer sender", target=sender, args=(sequencer,))
     sequencer_receiver = Process(name="Sequencer receiver", target=receiver, args=(sequencer,))
     sequencer_receiver.start()
@@ -47,6 +53,8 @@ def main():
 
     for node in processes:
         processes[node][0].start()
+
+    token_ring(nodes=nodes)
 
     for proc1, proc2 in processes.values():
         proc1.join()
