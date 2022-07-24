@@ -16,7 +16,8 @@ class Message:
         self.origin_address: Address = origin_address
 
     def __eq__(self, other: Message) -> bool:
-        return (self.data == other.data) and (self.id == other.id)
+        return (self.data == other.data) and (self.id == other.id) \
+               and (self.origin_id == other.origin_id)
 
     def to_bytes(self) -> bytes:
         return f"{self.data}#{self.id}#{self.origin_id}#{self.origin_address}".encode()

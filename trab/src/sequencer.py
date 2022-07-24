@@ -24,10 +24,12 @@ class Sequencer:
         process_address = message.origin_address
 
         if (message in self._sends_messages[process_address]):
+            print(f"{self.id}: Já havia recebido '{message.data}', ignorando...")
             return None
 
-        print(f"{self.id} received '{message.data}' "
-              f"from {message.origin_id}.")
+        print(f"{self.id}: mensagem '{message.data}', "
+              f"recebida de '{message.origin_id}', aguardando para ser entregue.")
+
         self._sends_messages[process_address].append(message)
         broadcast_message: Message = Message(data=message.data, id_=self._seq_num,
                                              origin_id=self.id, origin_address=self._sender_address)
@@ -58,5 +60,5 @@ class Sequencer:
         s.connect(address)
         s.sendall(message.to_bytes())
         s.close()
-        print(f"{self.id} send '{message.data}' to {address_to_id(address)}{address}.")
+        print(f"{self.id}: enviou '{message.data}' para '{address_to_id(address)}'.")
         return None

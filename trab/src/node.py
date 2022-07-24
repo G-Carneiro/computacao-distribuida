@@ -31,6 +31,7 @@ class Node:
 
     def deliver_message(self, message: Message) -> None:
         self.received_messages.append(message)
+        print(f"{self.id}: mensagem '{message.data}', recebida de '{message.origin_id}', entregue.")
         return None
 
     def check_buffer(self, process_address: Address):
@@ -55,12 +56,16 @@ class Node:
         try:
             process_buffer = self.buffer[process_address]
         except KeyError:
-            print(f"Erro: endereço {process_address} não reconhecido.")
+            print(f"{self.id}: Erro: endereço {process_address} não reconhecido.")
             return None
 
         if (message in process_buffer + self.received_messages):
+            print(f"{self.id}: Já havia recebido '{message.data}', ignorando...")
             return None
         id_msg_input = self.input_buffer[process_address]
+
+        print(f"{self.id}: mensagem '{message.data}', "
+              f"recebida de '{message.origin_id}', aguardando para ser entregue.")
 
         if message.id == id_msg_input:
             self.deliver_message(message=message)
@@ -69,9 +74,6 @@ class Node:
 
         else:
             self.buffer[process_address].append(message)
-
-        print(f"{self.id} received '{message.data}' "
-              f"from {message.origin_id}.")
 
         return None
 
@@ -90,5 +92,5 @@ class Node:
         s.connect(address)
         s.sendall(message)
         s.close()
-        print(f"{self.id} send '{data}' to {address_to_id(address)}{address}.")
+        print(f"{self.id}: enviou '{data}' para '{address_to_id(address)}'.")
         return None
