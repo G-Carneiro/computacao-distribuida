@@ -45,7 +45,6 @@ class Sequencer:
                 conn.sendall(data)
 
     def send(self, message: Message, origin_address: Address) -> None:
-        origin_address = (origin_address[0], origin_address[1] + 1)
         for address in self.addresses:
             if (origin_address != address) and (address != self.address):
                 self.send_to_socket(message=message, address=address)
