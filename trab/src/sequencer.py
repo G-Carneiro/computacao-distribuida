@@ -25,7 +25,7 @@ class Sequencer:
             return None
 
         print(f"{self.id}: mensagem '{message.data}', "
-              f"recebida de '{message.origin_id}', aguardando para ser entregue.")
+              f"recebida de '{message.origin_id}', aguardando para ser enviada aos outros nós.")
 
         self._sends_messages[process_address].append(message)
         broadcast_message: Message = Message(data=message.data, id_=self._seq_num,
