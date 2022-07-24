@@ -157,7 +157,7 @@
 % Informações de dados para CAPA e FOLHA DE ROSTO
 % ---
 \titulo{Relatório}
-\autor{Gabriel Campos Albino\\
+\autor{Gabriel Medeiros Lopes Carneiro\\
        Paulo Arthur Sens Coelho\\
        Erik Kazuo Sugawara}
 \local{Florianópolis, SC}
@@ -357,9 +357,7 @@ Prof. Dr. Odorico Machado Mendizabal}
 % ---
 % inserir lista de tabelas
 % ---
-\pdfbookmark[0]{\listtablename}{lot}
-\listoftables*
-\cleardoublepage
+
 % ---
 
 % ---
@@ -402,10 +400,13 @@ Prof. Dr. Odorico Machado Mendizabal}
 	\vspace*{5cm}
 	\textbf{Contato} \\
 	\vspace*{1cm}
-    Gabriel Campos Albino\\
+    Gabriel Medeiros Lopes Carneiro\\
+	Email: gabriel.mlc@grad.ufsc.br\\
+	\vspace*{0.5cm}
     Paulo Arthur Sens Coelho\\
+	Email: paulo.sens.coelho@grad.ufsc.br\\
+	\vspace*{0.5cm}
 	Erik Kazuo Sugawara \\
-	Telefone: +55 (48) 99814-7971 \\
 	Email: erik.sugawara@grad.ufsc.br \\
 \end{center}
 % ----------------------------------------------------------
@@ -445,15 +446,15 @@ garantindo o recebimento e envio de mensagens de múltiplos nodos.
 Cada nodo contém dois processos que instanciam sockets: o primeiro é utilizado para o recebimento de mensagens
 e o segundo é utilizado para enviar mensagens, uma vez que não conseguimos reutilizar o mesmo socket para realizar
 operações de envio e recebimento. Para garantir a entrega dos dados, foi utilizado o Protocolo TCP.  
-
-
-\subsection{Protocolo TCP}
 No socket foi utilizado o domínio AF\_INET para criarmos um socket capaz utilizar os endereços com seus respectivos Ip e Porta,
 dessa forma os nodos são capazes de comunicar entre si. Além disso,
 a garantia do recebimento de pacotes ponto a ponto facilita a elaboração de uma biblioteca
 mais robusta.
 
+\chapter{Desenvolvimento}
+\section{Biblioteca}
 \subsection{Nodo}
+
 A estrutura de cada nodo é composta por três tipos de buffer: do processo, de entrada e de saída.
 O de processo é responsável por armazenar as mensagens que precisam aguardar outras chegarem.
 O buffer de entrada armazena os IDs de cada mensagens e verifica se a mensagem já pode ser entregue.
@@ -470,8 +471,12 @@ podemos ver o esquema de um nodo.
     \label{fig:nodo}
 \end{figure}
 
-\chapter{Desenvolvimento}
-\section{Biblioteca}
+\section{Mensagem}
+Internamente as mensagens são compostas por quatro atributos: dados a serem enviados, id da mensagem,
+id do processo e endereço do processo. Cada mensagem é transferido na forma de bytes,
+onde é realizado um parse dela. Em nossa biblioteca, enviamos uma string com o seguinte
+corpo: DataTxt \# MsgID \# ProcessID \# ProcessAddress.
+
 \subsection{Recebimento de mensagens}
 O método responsável por receber as mensagens verifica se a mensagem recebida
 está no buffer do processo. Se sim, ignora a mensagem. Do contrário, verifica se
@@ -496,11 +501,28 @@ comunicantes.
     \label{fig:send}
 \end{figure}
 
-\section{Execução}
+\section{Algoritmo Token Ring}
+Nesse algoritmo é construído um anel lógico com os processos comunicantes.
+Em sua inicialização o processo 0 recebe um token. Ele deve circular 
+pelo anel passando de um processo k para o k + 1. Quando o processo
+recebe o token ele pode executar a região crítica (uma única vez) e, após sair,
+passa o token para o próximo processo. Se o processo não desejar entrar na 
+região crítica, deve apenas passar o token para o próximo processo.
 
+\section{Execução}
 \section{Resultados}
-\section{Algoritmo}
-Mostrar o algoritmo Ring.
+Para verificar o funcionamento das mensagens, realizamos um teste onde o nodo 1 envia
+duas mensagens para o nodo 2. Na figura \ref{fig:confirmado}, é mostrado a saída
+indicando que a mensagem foi entregue corretamente.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.9]{confirmado.png}
+    \caption{Envio de mensagens sendo entregue entre os processos.}
+    \label{fig:confirmado}
+\end{figure}
+
+
 \section{Conclusão}
 \section{Referências}
 %\section{Conclusões e/ou Recomendações}
