@@ -12,8 +12,9 @@ def receiver(node: Node) -> None:
 
 
 def sender(node: Node) -> None:
-    if node.receiver_address != ('127.0.0.1', 5001) and node.receiver_address != (HOST, 5007):
-        node.send_to_socket(('127.0.0.1', 5001), "oi")
+    if node.receiver_address == ('127.0.0.1', 5001):
+        node.send_to_socket(('127.0.0.1', 5003), "oi")
+        node.send_to_socket((HOST, 5003), "hi")
     return None
 
 

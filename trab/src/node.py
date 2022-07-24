@@ -21,8 +21,6 @@ class Node:
         self.receivers_addresses: List[Address] = receivers_addresses
         self.receiver_socket = socket(AF_INET, SOCK_STREAM)
         self.receiver_socket.bind(self.receiver_address)
-        self.sender_socket = socket(AF_INET, SOCK_STREAM)
-        self.sender_socket.bind(self.sender_address)
         self.id = id_
 
     def __str__(self):
@@ -88,8 +86,9 @@ class Node:
 
     def send_to_socket(self, address: Address, data: str) -> None:
         message: bytes = self.on_send(message=data, destiny_address=address)
-        self.sender_socket.connect(address)
-        self.sender_socket.sendall(message)
-        self.sender_socket.close()
+        s = socket(AF_INET, SOCK_STREAM)
+        s.connect(address)
+        s.sendall(message)
+        s.close()
         print(f"{self.id} send '{data}' to {address_to_id(address)}{address}.")
         return None
