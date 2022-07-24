@@ -448,38 +448,59 @@ operações de envio e recebimento. Para garantir a entrega dos dados, foi utili
 
 
 \subsection{Protocolo TCP}
-Foi utilizado o domínio AF\_INET para criarmos um socket capaz utilizar os endereços com IP e Porta.
-Além disso, a garantia do recebimento de pacotes facilita a elaboração da biblioteca.
-
-Explicar mais sobre o tcp
+No socket foi utilizado o domínio AF\_INET para criarmos um socket capaz utilizar os endereços com seus respectivos Ip e Porta,
+dessa forma os nodos são capazes de comunicar entre si. Além disso,
+a garantia do recebimento de pacotes ponto a ponto facilita a elaboração de uma biblioteca
+mais robusta.
 
 \subsection{Nodo}
-Cada nodo contem dois sockets, um para recebimento de mensagens e outro para envios.
-Contem o enderecos de outros nodos e seu id.
+A estrutura de cada nodo é composta por três tipos de buffer: do processo, de entrada e de saída.
+O de processo é responsável por armazenar as mensagens que precisam aguardar outras chegarem.
+O buffer de entrada armazena os IDs de cada mensagens e verifica se a mensagem já pode ser entregue.
+O buffer de saída adiciona os IDs em cada mensagem para cada um dos endereços de nodo.
+Para comunicação são utilizados dois sockets: um para recebimento de
+mensagens e outro para envios. Cada socket tem o seu próprio endereço,
+dessa forma um nodo tem dois sockets com diferentes portas. Na figura \ref{fig:nodo},
+podemos ver o esquema de um nodo.
 
-Explicar os atributos etc.
-
-\begin{figure}
+\begin{figure}[!h]
     \centering
     \includegraphics[scale=0.9]{node.jpg}
     \caption{Estrutura de um nodo}
     \label{fig:nodo}
 \end{figure}
 
-\subsection{Ordem Causal}
-1..1
-Explicar a ordem causal
-
-\subsection{Ordem Total}
-1..n
-Explicar a ordem total
-
 \chapter{Desenvolvimento}
 \section{Biblioteca}
+\subsection{Recebimento de mensagens}
+O método responsável por receber as mensagens verifica se a mensagem recebida
+está no buffer do processo. Se sim, ignora a mensagem. Do contrário, verifica se
+ela está no buffer de entrada e se já pode ser entregue. Se a mensagem está em seu estado válido,
+então a mensagem é entregue.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.8]{recv.jpg}
+    \caption{Estrutura do recebimento de mensagens}
+    \label{fig:recv}
+\end{figure}
+
+\subsection{Envio de mensagens}
+Para enviar as mensagens é necessário adicionar o ID em cada uma delas antes do envio.
+Sendo assim, foi utilizado um buffer de saída que armazena os IDs de cada mensagem para cada um dos
+comunicantes.
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.8]{send.jpg}
+    \caption{Estrutura do envio de mensagens}
+    \label{fig:send}
+\end{figure}
+
 \section{Execução}
+
 \section{Resultados}
 \section{Algoritmo}
-Ring
+Mostrar o algoritmo Ring.
 \section{Conclusão}
 \section{Referências}
 %\section{Conclusões e/ou Recomendações}
