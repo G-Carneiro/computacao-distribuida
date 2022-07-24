@@ -7,27 +7,23 @@ from .utils import Address, Buffer, Message, parse_msg, address_to_id
 class Node:
 
     def __init__(self, id_: int,
-                 receiver_address: Address,
-                 sender_address: Address,
-                 receivers_addresses: List[Address],
-                 senders_addresses: List[Address]):
-        self.buffer: Buffer = {address: [] for address in senders_addresses}
-        self.input_buffer: Dict[Address, int] = {address: 0 for address in senders_addresses}
-        self.output_buffer: Dict[Address, int] = {address: 0 for address in receivers_addresses}
+                 address: Address,
+                 addresses: List[Address]):
+        self.buffer: Buffer = {address: [] for address in addresses}
+        self.input_buffer: Dict[Address, int] = {address: 0 for address in addresses}
+        self.output_buffer: Dict[Address, int] = {address: 0 for address in addresses}
         self.received_messages: List[Message] = []
-        self.receiver_address: Address = receiver_address
-        self.sender_address: Address = sender_address
-        self.senders_addresses: List[Address] = senders_addresses
-        self.receivers_addresses: List[Address] = receivers_addresses
+        self.address: Address = address
+        self.addresses: List[Address] = addresses
         self.receiver_socket = socket(AF_INET, SOCK_STREAM)
-        self.receiver_socket.bind(self.receiver_address)
+        self.receiver_socket.bind(self.address)
         self.id = id_
 
     def __str__(self):
         return (self.buffer, self.input_buffer, self.output_buffer)
 
     def __repr__(self):
-        return f"{self.receiver_address}"
+        return f"{self.address}"
 
     def deliver_message(self, message: Message) -> None:
         self.received_messages.append(message)
@@ -46,7 +42,7 @@ class Node:
             
     def on_send(self, message: str, destiny_address: Address) -> bytes:
         id_msg = self.output_buffer[destiny_address]
-        message += f"#{id_msg}#{self.id}#{self.sender_address}"
+        message += f"#{id_msg}#{self.id}#{self.address}"
         self.output_buffer[destiny_address] += 1
         return message.encode()
 
@@ -78,7 +74,7 @@ class Node:
         return None
 
     def start_socket(self):
-        self.receiver_socket.listen(len(self.senders_addresses))
+        self.receiver_socket.listen(len(self.addresses))
         while True:
             conn, addr = self.receiver_socket.accept()
             with conn:

@@ -42,9 +42,6 @@ def parse_msg(data: bytes) -> Message:
 def address_to_id(address: Address) -> int:
     port: int = address[1]
     port -= PORT
-    if (port % 2):
-        port -= 1
-    port //= 2
     return port
 
 
