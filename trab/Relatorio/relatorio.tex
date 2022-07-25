@@ -535,7 +535,12 @@ Para iniciar os procedimentos, foi criado um arquivo de teste chamado "config\_n
 onde podemos configurar as mensagens que cada processo irá trocar entre si.
 Note que não pode existir espaços na mensagem que está sendo enviada
 e o número dos nodos não pode exceder o tamanho definido na constante
-"NUMBER\_OF\_PROCESS" no arquivo "utils.py".
+"NUMBER\_OF\_PROCESS" no arquivo "utils.py". Além disso, foi adicionado
+o método sleep() para simular o processamento e atraso das mensagens.
+Para executar o programa basta realizar as configurações desejadas no arquivo
+"config\_node\_test.txt" localizada na pasta "Config" e executar
+no terminal o comando: "python3 main.py".
+
 
 
 \subsection{1 para 1}
@@ -552,7 +557,8 @@ todos os nodos.
 \subsection{Token}
 Para testar o funcionamento do token podemos realizar a seguinte configuração:
 "ID Processo Origem : token : ID Processo Destino", onde token é uma palavra reservada.
-
+Se utilizarmo a seguinte linha "0 : token : 3", iremos observar o token indo do nodo 0
+até o nodo 3. Note que não podemos adicionar a nomenclatura broadcast -1 no ID de destino.
 
 \section{Resultados}
 Para verificar o funcionamento básico das mensagens de um processo para outro,
@@ -567,7 +573,26 @@ indicando que a mensagem foi entregue corretamente.
     \label{fig:confirmado}
 \end{figure}
 
-Com a utilização do algoritmo de token, obtemos o seguinte resultado:
+Para verificar o funcionamento do broadcast, fizemos com que o nodo 2
+realizasse este processo. Na figura \ref{fig:broadcast}, é demonstrado 
+o nodo 2 realizando um broadcast.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.9]{broadcast.png}
+    \caption{Broadcast feito pelo nodo 2.}
+    \label{fig:broadcast}
+\end{figure}
+
+Para verificar o token ring, iniciamos o nodo 0 com um token.Na figura \ref{fig:token}
+conseguimos verificar a transferência de token entre os nodos na rede. 
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.9]{token.png}
+    \caption{Token iniciado no nodo 0 e sendo passado para os demais.}
+    \label{fig:token}
+\end{figure}
 
 \section{Conclusão}
 Os sistemas distribuídos possuem componentes que realizam troca de mensagens entre si.
@@ -624,12 +649,7 @@ concorrência e das dificuldades de criar uma biblioteca capaz de garantir a ord
 %
 %\glossary
 
-\begin{anexosenv}
-\chapter{Biblioteca}
-\section{Código}
 
-\chapter{Algoritmo}
-\end{anexosenv}
 %---------------------------------------------------------------------
 % INDICE REMISSIVO
 %---------------------------------------------------------------------
