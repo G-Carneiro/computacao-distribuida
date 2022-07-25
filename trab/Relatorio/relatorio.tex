@@ -533,7 +533,10 @@ região crítica, deve apenas passar o token para o próximo processo.
 \section{Execução}
 Para iniciar os procedimentos, foi criado um arquivo de teste chamado "config\_node\_test.txt",
 onde podemos configurar as mensagens que cada processo irá trocar entre si.
-Note que não pode existir espaços na mensagem que está sendo enviada.
+Note que não pode existir espaços na mensagem que está sendo enviada
+e o número dos nodos não pode exceder o tamanho definido na constante
+"NUMBER\_OF\_PROCESS" no arquivo "utils.py".
+
 
 \subsection{1 para 1}
 A configuração para enviar de um para um é feita da seguinte forma: ID Processo Origem : Mensagem : ID Processo Destino.
