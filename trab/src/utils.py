@@ -62,6 +62,10 @@ def parser(file_path: str) -> List[Tuple[int, str, int]]:
                       f"Deve ser um valor entre [-1, {NUMBER_OF_PROCESS - 1}]")
                 exit()
 
+            if (message == TOKEN and destiny_id == -1):
+                print(f"'{TOKEN}' não pode ter destino '{destiny_id}' (broadcast).")
+                exit()
+
             messages.append((origin_id, message, destiny_id))
 
     return messages

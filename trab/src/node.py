@@ -1,5 +1,5 @@
-from time import sleep
 from socket import socket, AF_INET, SOCK_STREAM
+from time import sleep
 from typing import List, Dict
 
 from .utils import Address, Buffer, Message, parse_msg, address_to_id, TOKEN
