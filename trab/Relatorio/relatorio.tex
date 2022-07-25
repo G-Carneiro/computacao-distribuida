@@ -462,7 +462,7 @@ O buffer de saída adiciona os IDs em cada mensagem para cada um dos endereços 
 Para comunicação são utilizados dois sockets: um para recebimento de
 mensagens e outro para envios. Cada socket tem o seu próprio endereço,
 dessa forma um nodo tem dois sockets com diferentes portas. Na figura \ref{fig:nodo},
-podemos ver o esquema de um nodo.
+podemos ver o esquema de um nodo na rede de comunicação.
 
 \begin{figure}[!h]
     \centering
@@ -486,7 +486,7 @@ então a mensagem é entregue.
 \begin{figure}[!h]
     \centering
     \includegraphics[scale=0.8]{recv.jpg}
-    \caption{Estrutura do recebimento de mensagens}
+    \caption{Estrutura do recebimento de mensagens.}
     \label{fig:recv}
 \end{figure}
 
@@ -497,9 +497,23 @@ comunicantes.
 \begin{figure}[!h]
     \centering
     \includegraphics[scale=0.8]{send.jpg}
-    \caption{Estrutura do envio de mensagens}
+    \caption{Estrutura do envio de mensagens.}
     \label{fig:send}
 \end{figure}
+
+\section{Ordenação Causal}
+Para garantia da ordem de mensagens de 1 para 1, foi elaborado 
+no nodo um esquema de buffers onde uma mensagem que chega no nodo  
+é verificada se já foi recebida ou está aguardando outras mensagens,
+caso ela já foi recebida essa mensagem é ignorada, do contrário aguarda
+pelas restantes e é enviada posteriormente.
+
+\section{Ordenação Total}
+Para assegurar que todas as mensagens sejam entregues a todos os nodos pela mesma ordem,
+foi necessário criar a classe Sequencer que realiza a ordenação das mensagens e envia
+para todos na rede. Ela é composta por um socket que recebe as mensagens, um buffer de mensagens e uma lista de endereços
+de cada nodo. Com essas informações é atribuído um número de sequência único para todas 
+as mensagens que são enviadas posteriormente.
 
 \section{Algoritmo Token Ring}
 Nesse algoritmo é construído um anel lógico com os processos comunicantes.
@@ -509,9 +523,37 @@ recebe o token ele pode executar a região crítica (uma única vez) e, após sa
 passa o token para o próximo processo. Se o processo não desejar entrar na 
 região crítica, deve apenas passar o token para o próximo processo.
 
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.9]{token.jpg}
+    \caption{Esquema de um token ring.}
+    \label{fig:token}
+\end{figure}
+
 \section{Execução}
+Para iniciar os procedimentos, foi criado um arquivo de teste chamado "config\_node\_test.txt",
+onde podemos configurar as mensagens que cada processo irá trocar entre si.
+Note que não pode existir espaços na mensagem que está sendo enviada.
+
+\subsection{1 para 1}
+A configuração para enviar de um para um é feita da seguinte forma: ID Processo Origem : Mensagem : ID Processo Destino.
+Por exemplo, se tivéssemos a seguinte configuração: "0 : OlaMundo : 1", o nodo
+0 irá enviar uma mensagem OlaMundo para o nodo 1. 
+
+\subsection{1 para N}
+A configuração para realizar o \emph{broadcast} é feita da seguinte forma:
+"ID Processo Origem : Mensagem : -1", onde o -1 indica que será feito um broadcast.
+Por exemplo, a seguinte linha "2 : Teste : -1", fará com que o nodo 2 envie a mensagem "Teste" para
+todos os nodos.
+
+\subsection{Token}
+Para testar o funcionamento do token podemos realizar a seguinte configuração:
+"ID Processo Origem : token : ID Processo Destino", onde token é uma palavra reservada.
+
+
 \section{Resultados}
-Para verificar o funcionamento das mensagens, realizamos um teste onde o nodo 1 envia
+Para verificar o funcionamento básico das mensagens de um processo para outro,
+foi realizado um teste onde o nodo 1 envia
 duas mensagens para o nodo 2. Na figura \ref{fig:confirmado}, é mostrado a saída
 indicando que a mensagem foi entregue corretamente.
 
@@ -522,9 +564,22 @@ indicando que a mensagem foi entregue corretamente.
     \label{fig:confirmado}
 \end{figure}
 
+Com a utilização do algoritmo de token, obtemos o seguinte resultado:
 
 \section{Conclusão}
-\section{Referências}
+Os sistemas distribuídos possuem componentes que realizam troca de mensagens entre si.
+É necessário uma sincronização para que seja possível coordenar as suas ações,
+uma vez que pode existir concorrência no envio de mensagens entre os comunicantes.
+Para resolver esse problema, foi elaborado uma biblioteca capaz de garantir o ordenamento
+e recebimento correto das mensagens. Durante a sua elaboração, foi necessário compreender
+o funcionamento da ordem causal e total no recebimento de mensagens, como também 
+entender os efeitos do algoritmo de exclusão mútua chamado \emph{token ring} dentro da rede.
+Dessa forma, conseguimos compreender os problemas de sincronização que envolvem
+concorrência e das dificuldades de criar uma biblioteca capaz de garantir a ordem e integridade das mensagens.
+
+
+
+
 %\section{Conclusões e/ou Recomendações}
 %\section{Referências}
 
