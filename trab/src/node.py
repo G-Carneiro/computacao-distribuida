@@ -2,21 +2,19 @@ from time import sleep
 from socket import socket, AF_INET, SOCK_STREAM
 from typing import List, Dict
 
-from .utils import Address, Buffer, Message, parse_msg, address_to_id
+from .utils import Address, Buffer, Message, parse_msg, address_to_id, TOKEN
 
 
 class Node:
 
     def __init__(self, id_: int,
                  address: Address,
-                 sequencer_address: Address,
                  addresses: List[Address]):
         self.buffer: Buffer = {address: [] for address in addresses}
         self.input_buffer: Dict[Address, int] = {address: 1 for address in addresses}
         self.output_buffer: Dict[Address, int] = {address: 1 for address in addresses}
         self.received_messages: List[Message] = []
         self.address: Address = address
-        self.sequencer_address: Address = sequencer_address
         self.addresses: List[Address] = addresses
         self.receiver_socket = socket(AF_INET, SOCK_STREAM)
         self.receiver_socket.bind(self.address)
@@ -69,7 +67,7 @@ class Node:
             print(f"{self.id}: Erro: endereço {process_address} não reconhecido.")
             return None
 
-        if (message.data == "token"):
+        if (message.data == TOKEN):
             destiny_address: Address = self.addresses[(self.id + 1) % (len(self.addresses) - 1)]
             sleep(5)
             self.send_to_socket(address=destiny_address, data=message.data)
@@ -100,10 +98,6 @@ class Node:
                 data = conn.recv(1024)
                 self.on_recv(msg=data)
                 conn.sendall(data)
-
-    def broadcast(self, message: str) -> None:
-        self.send_to_socket(address=self.sequencer_address, data=message)
-        return None
 
     def send_to_socket(self, address: Address, data: str) -> None:
         message: bytes = self.on_send(message=data, destiny_address=address)

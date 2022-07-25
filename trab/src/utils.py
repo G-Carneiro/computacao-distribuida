@@ -4,6 +4,7 @@ from typing import Tuple, Dict, List
 
 HOST: str = "127.0.0.1"
 PORT: int = 5000
+TOKEN: str = "token"
 NUMBER_OF_PROCESS: int = 3
 ADDRESS_TO_ID: Dict[Address, int] = {}
 
@@ -37,6 +38,33 @@ def parse_msg(data: bytes) -> Message:
 
     return Message(data=msg, id_=int(msg_id),
                    origin_id=int(proc_id), origin_address=eval(proc_address))
+
+
+def parser(file_path: str) -> List[Tuple[int, str, int]]:
+    with open(file_path, "r") as file:
+        lines = file.readlines()
+        messages: List[Tuple[int, str, int]] = []
+
+        for line in lines:
+            splitted = line.split(":")
+
+            origin_id: int = int(splitted[0])
+            if (origin_id < 0 or origin_id >= NUMBER_OF_PROCESS):
+                print(f"ID de origem {origin_id} é inválido. \n"
+                      f"Deve ser um valor entre [0, {NUMBER_OF_PROCESS - 1}]")
+                exit()
+
+            message: str = splitted[1].replace(" ", "")
+
+            destiny_id: int = int(splitted[2])
+            if (destiny_id < -1 or destiny_id >= NUMBER_OF_PROCESS):
+                print(f"ID de destino {destiny_id} é inválido. \n"
+                      f"Deve ser um valor entre [-1, {NUMBER_OF_PROCESS - 1}]")
+                exit()
+
+            messages.append((origin_id, message, destiny_id))
+
+    return messages
 
 
 def address_to_id(address: Address) -> int:
