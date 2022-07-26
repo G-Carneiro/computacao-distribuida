@@ -40,10 +40,10 @@ def parse_msg(data: bytes) -> Message:
                    origin_id=int(proc_id), origin_address=eval(proc_address))
 
 
-def parser(file_path: str) -> List[Tuple[int, str, int]]:
+def parser(file_path: str) -> Dict[int, List[Tuple[str, int]]]:
     with open(file_path, "r") as file:
         lines = file.readlines()
-        messages: List[Tuple[int, str, int]] = []
+        messages: Dict[int, List[Tuple[str, int]]] = {i: [] for i in range(NUMBER_OF_PROCESS)}
 
         for line in lines:
             splitted = line.split(":")
@@ -66,7 +66,7 @@ def parser(file_path: str) -> List[Tuple[int, str, int]]:
                 print(f"'{TOKEN}' não pode ter destino '{destiny_id}' (broadcast).")
                 exit()
 
-            messages.append((origin_id, message, destiny_id))
+            messages[origin_id].append((message, destiny_id))
 
     return messages
 
