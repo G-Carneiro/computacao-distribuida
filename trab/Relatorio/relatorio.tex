@@ -461,8 +461,10 @@ O buffer de entrada armazena os IDs de cada mensagens e verifica se a mensagem j
 O buffer de saída adiciona os IDs em cada mensagem para cada um dos endereços de nodo.
 Para comunicação são utilizados dois sockets: um para recebimento de
 mensagens e outro para envios. Cada socket tem o seu próprio endereço,
-dessa forma um nodo tem dois sockets com diferentes portas. Na figura \ref{fig:nodo},
-podemos ver o esquema de um nodo na rede de comunicação.
+dessa forma um nodo tem dois sockets com diferentes portas. Além disso,
+cada nodo possui um processo \emph{receiver} e \emph{sender}, sendo o primeiro
+responsável por receber e tratar as mensagens e o segundo para enviar elas.
+Na figura \ref{fig:nodo}, podemos ver o esquema de um nodo na rede de comunicação.
 
 \begin{figure}[!h]
     \centering
@@ -515,6 +517,18 @@ para todos na rede. Ela é composta por um socket que recebe as mensagens, um bu
 de cada nodo. Com essas informações é atribuído um número de sequência único para todas 
 as mensagens que são enviadas posteriormente.
 
+\section{Arquivo utils.py}
+Neste arquivo podemos realizar as configurações referentes ao endereço
+da rede, do número de processos e do nome para a palavra reservada "token" utilizada
+nos arquivos de teste.
+
+\begin{lstlisting}[language=python]
+HOST: str = "127.0.0.1"
+PORT: int = 5000
+TOKEN: str = "token"
+NUMBER_OF_PROCESS: int = 3
+\end{lstlisting}
+
 \section{Algoritmo Token Ring}
 Nesse algoritmo é construído um anel lógico com os processos comunicantes.
 Em sua inicialização o processo 0 recebe um token. Ele deve circular 
@@ -538,9 +552,9 @@ e o número dos nodos não pode exceder o tamanho definido na constante
 "NUMBER\_OF\_PROCESS" no arquivo "utils.py". Além disso, foi adicionado
 o método sleep() para simular o processamento e atraso das mensagens.
 Para executar o programa basta realizar as configurações desejadas no arquivo
-"config\_node\_test.txt" localizada na pasta "Config" e executar
-no terminal o comando: "python3 main.py".
-
+"config\_node\_test.txt" localizada na pasta "Config", que contém exemplos 
+de arquivos de configuração. Para executar basta digitar no terminal o comando: "\textbf{python3 main.py caminho\_do\_arquivo"}.
+Na raiz do projeto, podemos executar por exemplo: "python3 main.py ./Config/config\_node\_test.txt".
 
 
 \subsection{1 para 1}
@@ -557,8 +571,8 @@ todos os nodos.
 \subsection{Token}
 Para testar o funcionamento do token podemos realizar a seguinte configuração:
 "ID Processo Origem : token : ID Processo Destino", onde token é uma palavra reservada.
-Se utilizarmo a seguinte linha "0 : token : 3", iremos observar o token indo do nodo 0
-até o nodo 3. Note que não podemos adicionar a nomenclatura broadcast -1 no ID de destino.
+Se utilizarmo a seguinte linha "0 : token : 1", iremos observar o token indo do nodo 0
+até o nodo 1. Note que não podemos adicionar a nomenclatura broadcast -1 no ID de destino.
 
 \section{Resultados}
 Para verificar o funcionamento básico das mensagens de um processo para outro,
