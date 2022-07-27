@@ -517,18 +517,6 @@ para todos na rede. Ela é composta por um socket que recebe as mensagens, um bu
 de cada nodo. Com essas informações é atribuído um número de sequência único para todas 
 as mensagens que são enviadas posteriormente.
 
-\section{Arquivo utils.py}
-Neste arquivo podemos realizar as configurações referentes ao endereço
-da rede, do número de processos e do nome para a palavra reservada "token" utilizada
-nos arquivos de teste.
-
-\begin{lstlisting}[language=python]
-HOST: str = "127.0.0.1"
-PORT: int = 5000
-TOKEN: str = "token"
-NUMBER_OF_PROCESS: int = 3
-\end{lstlisting}
-
 \section{Algoritmo Token Ring}
 Nesse algoritmo é construído um anel lógico com os processos comunicantes.
 Em sua inicialização o processo 0 recebe um token. Ele deve circular 
@@ -543,6 +531,18 @@ região crítica, deve apenas passar o token para o próximo processo.
     \caption{Esquema de um token ring.}
     \label{fig:token}
 \end{figure}
+
+\section{Arquivo utils.py}
+Neste arquivo podemos realizar as configurações referentes ao endereço
+da rede, do número de processos e do nome para a palavra reservada "token" utilizada
+nos arquivos de teste.
+
+\begin{lstlisting}[language=python]
+HOST: str = "127.0.0.1"
+PORT: int = 5000
+TOKEN: str = "token"
+NUMBER_OF_PROCESS: int = 3
+\end{lstlisting}
 
 \section{Execução}
 Para iniciar os procedimentos, foi criado um arquivo de teste chamado "config\_node\_test.txt",
