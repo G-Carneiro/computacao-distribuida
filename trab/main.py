@@ -1,19 +1,22 @@
 from multiprocessing import Process
+from sys import argv
 from time import sleep
-from typing import List, Tuple, Union, Dict
+from typing import List, Tuple, Union
 
 from src.node import Node
 from src.sequencer import Sequencer
-from src.utils import Address, HOST, PORT, NUMBER_OF_PROCESS, parser, Message
+from src.utils import Address, HOST, PORT, NUMBER_OF_PROCESS, parser
 
 nodes: List[Union[Node, Sequencer]] = []
 
 
+# função que será chamada por Receivers Processes
 def receiver(node: Node) -> None:
     node.start_socket()
     return None
 
 
+# função que será chamada por Senders Processes
 def sender(node: Node, messages: Tuple[str, int]) -> None:
     for message, destiny_id in messages:
         node.send_to_socket(address=nodes[destiny_id].address, data=message)
@@ -21,17 +24,16 @@ def sender(node: Node, messages: Tuple[str, int]) -> None:
     return None
 
 
-def token_ring(nodes: List[Node]) -> None:
-    nodes[0].send_to_socket(nodes[1].address, data="token")
-    return None
-
-
-def broadcast() -> None:
-    pass
-
-
 def main() -> None:
-    messages: Dict[int, List[Tuple[str, int]]] = parser("Config/config_node_test.txt")
+    try:
+        # para executar outro arquivo, use no seu terminal
+        # python3 main.py caminho_do_arquivo
+        file_path: str = argv[1]
+    except IndexError:
+        # arquivo padrão de execução
+        file_path = "Config/config_node_test.txt"
+
+    messages: List[List[Tuple[str, int]]] = parser(file_path)
     addresses: List[Address] = []
 
     # inicializa todos endereços
@@ -47,21 +49,25 @@ def main() -> None:
     sequencer_receiver.start()
 
     # cria os nodos e processos para recebimento de mensagens
+    # devem ser inicializados antes dos processos responsáveis
+    # por enviar mensagens.
     receivers_processes: List[Process] = []
     for i in range(NUMBER_OF_PROCESS):
         node: Node = Node(id_=i, address=addresses[i], addresses=addresses)
         nodes.append(node)
 
-        new_receiver: Process = Process(name=f"Processo {node.id} - Receiver", target=receiver, args=(node,))
+        new_receiver: Process = Process(name=f"Processo {node.id} - Receiver",
+                                        target=receiver, args=(node,))
         receivers_processes.append(new_receiver)
         new_receiver.start()
 
     # adiciona o sequencer a lista de nós conhecidos
     nodes.append(sequencer)
 
-    # token_ring(nodes=nodes)
-
-    # cria processos para envio de cada mensagem
+    # cria um processo para cada nó fazer envio de suas mensagens
+    # esses processos DEVEM ser iniciados somente após o receivers iniciarem
+    # caso contrário os ‘sockets’ apresentaram erro de conexão, visto que
+    # tentarão se conectar a um que ainda não existe.
     senders_processes: List[Process] = []
     for i in range(NUMBER_OF_PROCESS):
         new_sender: Process = Process(name=f"Processo {i} - Sender",
@@ -77,7 +83,7 @@ def main() -> None:
     # para evitar problemas de encerrar receivers antes de
     # receberem todas as mensagens um sleep será usado
     # como os receivers ‘sockets’ estão sempre em ‘loop’ é necessário
-    # forçar sua para parada com um terminate(), caso isso seka feito
+    # forçar sua para parada com um terminate(), caso isso seja feito
     # antes do recebimento e tratamento da mensagem, pode gerar problemas
     # isso também afetará o algoritmo de ‘token ring’, visto que ele fica
     # mandando mensagens pela rede em ‘loop’

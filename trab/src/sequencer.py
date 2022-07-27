@@ -46,8 +46,10 @@ class Sequencer:
 
     def send(self, message: Message, origin_address: Address) -> None:
         for address in self.addresses:
-            if (origin_address != address) and (address != self.address):
+            if (address != self.address):
                 self.send_to_socket(message=message, address=address)
+
+        print(f"{self.id}: mensagem enviada para todos os nós.")
 
         return None
 

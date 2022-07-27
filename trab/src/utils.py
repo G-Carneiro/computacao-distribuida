@@ -40,17 +40,18 @@ def parse_msg(data: bytes) -> Message:
                    origin_id=int(proc_id), origin_address=eval(proc_address))
 
 
-def parser(file_path: str) -> Dict[int, List[Tuple[str, int]]]:
+def parser(file_path: str) -> List[List[Tuple[str, int]]]:
     with open(file_path, "r") as file:
         lines = file.readlines()
-        messages: Dict[int, List[Tuple[str, int]]] = {i: [] for i in range(NUMBER_OF_PROCESS)}
+        messages: List[List[Tuple[str, int]]] = [[] for _ in range(NUMBER_OF_PROCESS)]
 
         for line in lines:
             splitted = line.split(":")
 
             origin_id: int = int(splitted[0])
             if (origin_id < 0 or origin_id >= NUMBER_OF_PROCESS):
-                print(f"ID de origem {origin_id} é inválido. \n"
+                print(f"Erro na mensagem '{line}' \n"
+                      f"ID de origem {origin_id} é inválido. \n"
                       f"Deve ser um valor entre [0, {NUMBER_OF_PROCESS - 1}]")
                 exit()
 
@@ -58,12 +59,14 @@ def parser(file_path: str) -> Dict[int, List[Tuple[str, int]]]:
 
             destiny_id: int = int(splitted[2])
             if (destiny_id < -1 or destiny_id >= NUMBER_OF_PROCESS):
-                print(f"ID de destino {destiny_id} é inválido. \n"
+                print(f"Erro na mensagem '{line}' \n"
+                      f"ID de destino {destiny_id} é inválido. \n"
                       f"Deve ser um valor entre [-1, {NUMBER_OF_PROCESS - 1}]")
                 exit()
 
             if (message == TOKEN and destiny_id == -1):
-                print(f"'{TOKEN}' não pode ter destino '{destiny_id}' (broadcast).")
+                print(f"Erro na mensagem '{line}' \n"
+                      f"'{TOKEN}' não pode ter destino '{destiny_id}' (broadcast).")
                 exit()
 
             messages[origin_id].append((message, destiny_id))
