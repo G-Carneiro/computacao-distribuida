@@ -6,7 +6,6 @@ HOST: str = "127.0.0.1"
 PORT: int = 5000
 TOKEN: str = "token"
 NUMBER_OF_PROCESS: int = 3
-ADDRESS_TO_ID: Dict[Address, int] = {}
 
 
 class Message:
